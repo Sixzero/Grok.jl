@@ -87,10 +87,31 @@ function requestApi(
         
         # Handle regular JSON response
         contentType = HTTP.header(response, "content-type", "")
+        # Try to parse as JSON even if content-type is not set properly
         if occursin("application/json", contentType)
             value = JSON3.read(response.body)
-            return Dict("success" => true, "value" => value)
+            return Dict("success" => true, "value" => value)            
+        elseif (isempty(contentType) && length(response.body) > 0) # why this can happen, there is no content-type?
+            body_str = String(response.body)
+            if occursin('\n', body_str)
+                # Multi-line JSON - split and parse each line
+                chunks = []
+                for line in split(body_str, '\n')
+                    if !isempty(line)
+                        try
+                            push!(chunks, JSON3.read(line))
+                        catch e
+                            println("Error parsing JSON chunk: $e")
+                        end
+                    end
+                end
+                # Return the parsed chunks with a special structure
+                if !isempty(chunks)
+                    return Dict("success" => true, "value" => Dict("chunks" => chunks))
+                end
+            end
         else
+
             # Return empty object for non-JSON responses
             return Dict("success" => true, "value" => Dict())
         end

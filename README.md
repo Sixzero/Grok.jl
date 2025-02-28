@@ -86,9 +86,6 @@ response2 = grokChat(
     ]),
     auth
 )
-
-# List all cached conversations
-conversations = list_conversations()
 ```
 
 ## Authentication Caching

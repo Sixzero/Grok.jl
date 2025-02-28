@@ -228,7 +228,7 @@ function grokChat(options::GrokChatOptions, auth::TwitterAuth)
             end
         end
     else
-        # For single responses (like rate limiting), wrap in array
+        # For single responses, wrap the value itself in array
         push!(chunks, res["value"])
     end
 
@@ -276,7 +276,6 @@ function grokChat(options::GrokChatOptions, auth::TwitterAuth)
     if haskey(res["value"], "text") && !isempty(res["value"]["text"])
         fullMessage = res["value"]["text"]
     else
-        # Otherwise, combine message chunks
         fullMessage = extract_messages_from_chunks(chunks)
     end
     
