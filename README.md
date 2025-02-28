@@ -23,13 +23,13 @@ Pkg.add("Grok")
 ```julia
 using Grok
 
-# Login to X (Twitter)
-username = get(ENV, "TWITTER_USERNAME", "")
-password = get(ENV, "TWITTER_PASSWORD", "")
-email = get(ENV, "TWITTER_EMAIL", nothing)  # Optional, may be required for some accounts
+# Set environment variables for authentication
+# ENV["TWITTER_USERNAME"] = "your_username"
+# ENV["TWITTER_PASSWORD"] = "your_password"
+# ENV["TWITTER_EMAIL"] = "your_email@example.com"  # Optional
 
-# Authenticate
-result = Grok.login(username, password; email=email)
+# Login using environment variables
+result = Grok.login()  # Uses ENV vars by default
 auth = result["auth"]
 
 # Create a simple chat request
@@ -78,7 +78,6 @@ response1 = grokChat(
 
 # Continue the conversation with a follow-up question
 # The package automatically uses the existing conversation 
-# when you provide the same first message
 response2 = grokChat(
     GrokChatOptions([
         GrokMessage("user", "What are the three laws of robotics?"),
@@ -97,14 +96,17 @@ conversations = list_conversations()
 Grok.jl caches successful authentications to avoid unnecessary logins:
 
 ```julia
-# First login will perform full authentication
-result1 = Grok.login(username, password)
+# First login performs full authentication
+result1 = Grok.login()  # Uses environment variables
 
-# Subsequent logins with same credentials use cached session
-result2 = Grok.login(username, password)  # Uses cached auth
+# Subsequent logins use cached session
+result2 = Grok.login()  # Uses cached auth
 
 # Force a fresh login if needed
-result3 = Grok.login(username, password; force=true)  # Bypasses cache
+result3 = Grok.login(force=true)  # Bypasses cache
+
+# Explicitly provide credentials
+result4 = Grok.login("username", "password")
 ```
 
 ## Examples
