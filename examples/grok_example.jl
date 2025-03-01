@@ -2,11 +2,6 @@ using Grok
 
 # Example usage of Grok chat with streaming
 # Get credentials from environment variables
-username = get(ENV, "TWITTER_USERNAME", "")
-username = "HavlikTamas"
-password = get(ENV, "TWITTER_PASSWORD", "")
-password = "athos3425z"
-email = get(ENV, "TWITTER_EMAIL", nothing)
 
 if isempty(username) || isempty(password)
     println("Please set TWITTER_USERNAME and TWITTER_PASSWORD environment variables")
@@ -58,3 +53,24 @@ println("\n\nFinal response:")
 println(response.message)
 #%%
 
+# Start a conversation
+response1 = grokChat(
+    GrokChatOptions(
+        streamCallback=streamCallback,
+        [GrokMessage("user", "What are the three laws of robotics?")]
+    ),
+    auth,
+)
+#%%
+# Continue the conversation with a follow-up question
+# The package automatically uses the existing conversation 
+response2 = grokChat(
+    GrokChatOptions(streamCallback=streamCallback,[
+        GrokMessage("user", "What are the three laws of robotics?"),
+        GrokMessage("assistant", response1.message),
+        GrokMessage("user", "Who created these laws?")
+    ]),
+    auth,
+)
+@show response2
+;

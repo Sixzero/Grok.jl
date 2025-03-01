@@ -4,72 +4,14 @@ using HTTP
 using JSON3
 using Dates
 
+include("Types.jl")
 include("TwitterLogin.jl")
 include("Api.jl")
-
-# Define the GrokStreamChunk type
-struct GrokStreamChunk
-    message::String
-    isThinking::Bool
-    responseType::Union{String, Nothing}
-    webResults::Union{Vector, Nothing}
-    isComplete::Union{Bool, Nothing}
-    metadata::Union{Dict, Nothing}
-end
-
-# Define the GrokStreamCallback type
-const GrokStreamCallback = Function
-
-# Define the GrokMessage type
-struct GrokMessage
-    role::String  # "user" or "assistant"
-    content::String
-end
-
-# Define the GrokChatOptions type
-struct GrokChatOptions
-    messages::Vector{GrokMessage}
-    conversationId::Union{String, Nothing}
-    returnSearchResults::Bool
-    returnCitations::Bool
-    isReasoning::Bool
-    stream::Bool
-    streamCallback::Union{GrokStreamCallback, Nothing}
-end
-
-# Constructor with default values
-function GrokChatOptions(
-    messages::Vector{GrokMessage};
-    conversationId=nothing,
-    returnSearchResults=true,
-    returnCitations=true,
-    isReasoning=false,
-    stream=false,
-    streamCallback=nothing
-)
-    return GrokChatOptions(
-        messages,
-        conversationId,
-        returnSearchResults,
-        returnCitations,
-        isReasoning,
-        stream,
-        streamCallback
-    )
-end
-
-# Define the GrokChatResponse type
-struct GrokChatResponse
-    conversationId::String
-    message::String
-    messages::Vector{GrokMessage}
-    webResults::Union{Vector, Nothing}
-    metadata::Union{Dict, Nothing}
-    rateLimit::Union{Dict, Nothing}
-end
+include("PromptingToolsIntegration.jl")
 
 # Include ConversationCache after defining GrokMessage
 include("ConversationCache.jl")
+
 
 # Export the types and functions
 export TwitterAuth, GrokMessage, GrokChatOptions, GrokChatResponse, GrokStreamChunk
@@ -177,7 +119,7 @@ function grokChat(options::GrokChatOptions, auth::TwitterAuth)
     end
 
     # Log the messages being sent for debugging
-    println("Sending conversation with $(length(responses)) messages")
+    # println("Sending conversation with $(length(responses)) messages")
     
     payload = Dict(
         "responses" => responses,
@@ -317,6 +259,12 @@ function grokChat(options::GrokChatOptions, auth::TwitterAuth)
         chunks[1],
         nothing
     )
+end
+
+# Initialize PromptingTools integration if available
+function __init__()
+    # Register Grok with PromptingTools
+    register_grok_model()
 end
 
 end # End of module Grok
