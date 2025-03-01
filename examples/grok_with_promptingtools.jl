@@ -2,6 +2,9 @@
 
 using PromptingTools
 using Grok
+using StreamCallbacks
+using StreamCallbacksExt
+
 
 # Method 1: Using environment variables or cached authentication
 response = aigenerate("What is the meaning of life?"; model="grok",

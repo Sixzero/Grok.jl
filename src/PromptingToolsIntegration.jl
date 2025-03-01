@@ -88,16 +88,22 @@ function get_auth_from_kwargs(api_kwargs)
     end
     
     # Check if username and password are provided
-    username = get(api_kwargs, :username, nothing)
-    password = get(api_kwargs, :password, nothing)
+    username = get(api_kwargs, :username, get(ENV, "TWITTER_USERNAME", nothing))
+    password = get(api_kwargs, :password, get(ENV, "TWITTER_PASSWORD", nothing))
     
     if !isnothing(username) && !isnothing(password)
         # Login with provided credentials
-        return Grok.login(username, password)["auth"]
+        result = Grok.login(username, password)
+        # If login fails (no auth returned), print error info
+        if !haskey(result, "auth") || isnothing(result["auth"])
+            println("Grok login failed: ", get(result, "error", "Unknown error"))
+            return nothing
+        end
+        return result["auth"]
     end
     
-    # Try to get auth from cached credentials or environment variables
-    return Grok.login(get(ENV, "TWITTER_USERNAME", nothing), get(ENV, "TWITTER_PASSWORD", nothing))["auth"]
+    @warn "No authentication provided. Please provide valid credentials via api_kwargs or environment variables."
+    return nothing
 end
 
 """
