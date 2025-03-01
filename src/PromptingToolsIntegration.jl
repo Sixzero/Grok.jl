@@ -2,6 +2,7 @@
 using PromptingTools
 using HTTP
 using JSON3
+using StreamCallbacks
 
 export GrokPromptSchema, register_grok_model
 
@@ -176,13 +177,45 @@ function PromptingTools.aigenerate(schema::GrokPromptSchema,
     # Create stream callback if needed
     grok_stream_callback = nothing
     if !isnothing(streamcallback)
-        grok_stream_callback = function(chunk)
-            if !chunk.isThinking && !isempty(chunk.message)
-                if isa(streamcallback, IO)
+        # Handle different types of streamcallback
+        if streamcallback isa StreamCallbacks.AbstractStreamCallback
+            streamcallback.flavor = GrokStream()
+            # Use StreamCallbacks integration
+            grok_stream_callback = function(chunk)
+                if !chunk.isThinking && !isempty(chunk.message)
+                    # Convert metadata to JSON3.Object if it's not already
+                    json_data = if chunk.metadata isa JSON3.Object
+                        chunk.metadata
+                    elseif !isnothing(chunk.metadata)
+                        # Convert Dict to JSON3.Object
+                        JSON3.read(JSON3.write(chunk.metadata))
+                    else
+                        nothing
+                    end
+                    
+                    # Create a StreamCallbacks compatible chunk with keyword arguments
+                    sc_chunk = StreamCallbacks.StreamChunk(
+                        event = nothing,
+                        data = chunk.message,
+                        json = json_data
+                    )
+                    # Call the StreamCallbacks callback
+                    # Main.@edit StreamCallbacks.callback(streamcallback, sc_chunk)
+                    StreamCallbacks.callback(streamcallback, sc_chunk)
+                end
+            end
+        elseif isa(streamcallback, IO)
+            # Handle IO stream
+            grok_stream_callback = function(chunk)
+                if !chunk.isThinking && !isempty(chunk.message)
                     write(streamcallback, chunk.message)
-                else
-                    # Assume it's a callback function
-                    streamcallback(chunk.message)
+                end
+            end
+        else
+            # Assume it's a custom callback function
+            grok_stream_callback = function(chunk)
+                if !chunk.isThinking && !isempty(chunk.message)
+                    streamcallback(chunk)
                 end
             end
         end
@@ -249,6 +282,6 @@ function register_grok_model()
     # Add model aliases for easier access
     PromptingTools.MODEL_ALIASES["grok"] = "grok-3"
     
-    @info "Grok model registered with PromptingTools. Use alias 'grok' to access it."
+    # @info "Grok model registered with PromptingTools. Use alias 'grok' to access it."
     return nothing
 end

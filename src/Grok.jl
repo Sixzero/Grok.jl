@@ -7,6 +7,8 @@ using Dates
 include("Types.jl")
 include("TwitterLogin.jl")
 include("Api.jl")
+
+include("stream_grok.jl")
 include("PromptingToolsIntegration.jl")
 
 # Include ConversationCache after defining GrokMessage

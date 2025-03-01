@@ -3,7 +3,6 @@
 using PromptingTools
 using Grok
 using StreamCallbacks
-using StreamCallbacksExt
 
 
 # Method 1: Using environment variables or cached authentication
