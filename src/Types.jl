@@ -1,12 +1,12 @@
 
-# Define the GrokStreamChunk type
-struct GrokStreamChunk
+# Define the GrokStreamChunk type with keyword constructor
+@kwdef struct GrokStreamChunk
   message::String
-  isThinking::Bool
-  responseType::Union{String, Nothing}
-  webResults::Union{Vector, Nothing}
-  isComplete::Union{Bool, Nothing}
-  metadata::Union{Dict, Nothing}
+  isThinking::Bool = false
+  responseType::Union{String, Nothing} = nothing
+  webResults::Union{Vector, Nothing} = nothing
+  isComplete::Union{Bool, Nothing} = nothing
+  metadata::Union{Dict, Nothing} = nothing
 end
 
 # Define the GrokMessage type

@@ -1,7 +1,7 @@
 name = "Grok"
 uuid = "984bffd9-57d3-4ff5-9ddb-3d0ee8f98cca"
 authors = ["SixZero <havliktomi@hotmail.com> and contributors"]
-version = "1.0.0-DEV"
+version = "0.1.0"
 
 [deps]
 Base64 = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
@@ -17,6 +17,10 @@ Dates = "1.11.0"
 HTTP = "1.10.0"
 JSON3 = "1.14.0"
 julia = "1.10"
+StreamCallbacks = "≥0.5, 0.6"
+PromptingTools = "≥0.69.0"
+Aqua = "0.7"
+Test = "<0.0.1, 1"
 
 [extras]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"

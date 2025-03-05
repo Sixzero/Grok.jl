@@ -202,26 +202,26 @@ function execute_flow_task(auth::TwitterAuth, data::Dict)
     update_cookies_from_headers!(auth, response.headers)
     
     if response.status != 200
-        return Dict("status" => "error", "err" => String(response.body))
+        error_body = String(response.body)
+        println("Flow task error - Status: $(response.status), Body: $error_body")  # Add error print
+        return Dict("status" => "error", "err" => error_body)
     end
     
     flow = JSON3.read(response.body)
     
     # Check if flow_token is null or missing
     if !haskey(flow, :flow_token) || isnothing(flow.flow_token)
+        println("Flow task error - Missing flow_token in response")  # Add error print
         return Dict("status" => "error", "err" => "flow_token not found.")
-    end
-    
-    # Check if flow_token is a string
-    if typeof(flow.flow_token) != String
-        return Dict("status" => "error", "err" => "flow_token was not a string.")
     end
     
     # Check for errors
     if haskey(flow, :errors) && !isnothing(flow.errors) && length(flow.errors) > 0
+        error_msg = "Authentication error ($(flow.errors[1].code)): $(flow.errors[1].message)"
+        println("Flow task error - $error_msg")  # Add error print
         return Dict(
             "status" => "error",
-            "err" => "Authentication error ($(flow.errors[1].code)): $(flow.errors[1].message)"
+            "err" => error_msg
         )
     end
     
